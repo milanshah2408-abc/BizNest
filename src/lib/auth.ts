@@ -44,7 +44,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as typeof session.user & { id?: string }).id = token.sub as string;
       }
       if (session.user && 'admin' in token) {
-        (session.user as typeof session.user & { admin?: boolean }).admin = (token as JWT & { admin?: boolean }).admin;
+        (session.user as typeof session.user & { admin: boolean }).admin = (token as JWT & { admin?: boolean }).admin ?? false;
       }
       return session;
     },

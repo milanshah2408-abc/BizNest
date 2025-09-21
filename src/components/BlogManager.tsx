@@ -94,13 +94,13 @@ export default function BlogManager({ session }: { session: Session }) {
             placeholder="Title"
             className="w-full px-4 py-2 rounded bg-gray-800 text-white mb-2"
             value={form.title}
-            onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, title: e.target.value }))}
           />
           <textarea
             placeholder="Content"
             className="w-full px-4 py-2 rounded bg-gray-800 text-white"
             value={form.content}
-            onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm(f => ({ ...f, content: e.target.value }))}
           />
         </div>
         {error && <div className="text-red-400">{error}</div>}

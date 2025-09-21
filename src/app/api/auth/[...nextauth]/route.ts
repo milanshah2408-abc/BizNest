@@ -1,4 +1,5 @@
-import NextAuth, { type Session, type NextAuthOptions } from "next-auth";
+import NextAuth, { type Session, type NextAuthOptions, type User } from "next-auth";
+import type { AdapterUser } from "next-auth/adapters";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -34,7 +35,7 @@ export const authOptions = {
     error: "/login",
   },
   callbacks: {
-    async jwt({ token, user }: { token: JWT; user?: any }) {
+  async jwt({ token, user }: { token: JWT; user?: User | AdapterUser }) {
       if (user && typeof user === "object" && "admin" in user) {
         token.admin = user.admin;
       }
@@ -42,7 +43,7 @@ export const authOptions = {
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
-        (session.user as typeof session.user & { admin?: boolean }).admin = (token as JWT & { admin?: boolean }).admin;
+        (session.user as typeof session.user & { admin: boolean }).admin = (token as JWT & { admin?: boolean }).admin ?? false;
       }
       return session;
     },
