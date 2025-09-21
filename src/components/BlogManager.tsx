@@ -18,7 +18,7 @@ export default function BlogManager({ session }: { session: Session }) {
   async function fetchPosts() {
     setLoading(true);
     const res = await fetch('/api/posts');
-    const data = await res.json();
+    const data: Post[] = await res.json();
     setPosts(data);
     setLoading(false);
   }
