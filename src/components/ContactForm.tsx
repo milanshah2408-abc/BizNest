@@ -21,8 +21,12 @@ export default function ContactForm() {
       if (!res.ok) throw new Error('Failed to send message');
       setSuccess(true);
       setForm({ name: '', email: '', message: '' });
-    } catch (err: any) {
-      setError(err.message || 'Error occurred');
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Error occurred');
+      }
     } finally {
       setLoading(false);
     }

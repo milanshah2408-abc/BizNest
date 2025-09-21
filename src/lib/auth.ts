@@ -1,4 +1,6 @@
-import NextAuth from 'next-auth';
+import NextAuth, { type NextAuthOptions, type Session, type User } from 'next-auth';
+import type { AdapterUser } from 'next-auth/adapters';
+import type { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { PrismaClient } from '@prisma/client';
@@ -6,7 +8,7 @@ import { compare } from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -31,18 +33,18 @@ export const authOptions = {
     signOut: '/api/auth/signout',
   },
   callbacks: {
-    async jwt({ token, user }: { token: Record<string, unknown>; user?: { admin?: boolean } }) {
+    async jwt({ token, user }: { token: JWT; user?: User | AdapterUser }) {
       if (user && typeof user === 'object' && 'admin' in user) {
-        (token as Record<string, unknown> & { admin?: boolean }).admin = user.admin;
+        (token as JWT & { admin?: boolean }).admin = (user as User & { admin?: boolean }).admin;
       }
       return token;
     },
-    async session({ session, token }: { session: Record<string, any>; token: Record<string, any> }) {
-      if (token?.sub && session.user) {
-        (session.user as Record<string, any>).id = token.sub;
+    async session({ session, token }: { session: Session; token: JWT }) {
+      if (session.user && 'sub' in token) {
+        (session.user as typeof session.user & { id?: string }).id = token.sub as string;
       }
-      if (session.user) {
-        (session.user as Record<string, any>).admin = token.admin;
+      if (session.user && 'admin' in token) {
+        (session.user as typeof session.user & { admin?: boolean }).admin = (token as JWT & { admin?: boolean }).admin;
       }
       return session;
     },

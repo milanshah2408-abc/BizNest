@@ -12,13 +12,14 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || !session.user?.id) {
+  const userId = (session?.user as { id?: string })?.id;
+  if (!session || !userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const { name, description } = await req.json();
   if (!name || !description) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
-  const service = await prisma.service.create({ data: { name, description, userId: session.user.id } });
+  const service = await prisma.service.create({ data: { name, description, userId } });
   return NextResponse.json(service, { status: 201 });
 }
