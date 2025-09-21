@@ -9,7 +9,7 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   try {
-    const { id } = await context.params; // await the params
+  const { id } = context.params;
     const post = await prisma.post.findUnique({ where: { id } });
 
     if (!post) return NextResponse.json({ error: 'Post not found' }, { status: 404 });
@@ -26,7 +26,7 @@ export async function PUT(
   context: { params: { id: string } }
 ) {
   try {
-    const { id } = await context.params;
+  const { id } = context.params;
     const { title, content } = await req.json();
 
     if (!title || !content)
@@ -50,7 +50,7 @@ export async function DELETE(
   context: { params: { id: string } }
 ) {
   try {
-    const { id } = await context.params;
+  const { id } = context.params;
     await prisma.post.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
