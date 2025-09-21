@@ -1,3 +1,4 @@
+"use client";
 import Layout from '../../components/Layout';
 import { useSession, signOut } from 'next-auth/react';
 
