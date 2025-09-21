@@ -6,16 +6,16 @@ const prisma = new PrismaClient();
 // GET /api/posts/[id]
 export async function GET(
   _req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-  const { id } = context.params;
+    const { id } = await context.params;
     const post = await prisma.post.findUnique({ where: { id } });
 
     if (!post) return NextResponse.json({ error: 'Post not found' }, { status: 404 });
 
     return NextResponse.json(post);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
@@ -23,10 +23,10 @@ export async function GET(
 // PUT /api/posts/[id]
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-  const { id } = context.params;
+    const { id } = await context.params;
     const { title, content } = await req.json();
 
     if (!title || !content)
@@ -39,7 +39,7 @@ export async function PUT(
     });
 
     return NextResponse.json(updatedPost);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
@@ -47,13 +47,13 @@ export async function PUT(
 // DELETE /api/posts/[id]
 export async function DELETE(
   _req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-  const { id } = context.params;
+    const { id } = await context.params;
     await prisma.post.delete({ where: { id } });
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
