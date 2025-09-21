@@ -31,17 +31,19 @@ export const authOptions = {
     signOut: '/api/auth/signout',
   },
   callbacks: {
-    async jwt({ token, user }: { token: any; user?: any }) {
-      if (user) {
-        token.admin = user.admin;
+    async jwt({ token, user }: { token: Record<string, unknown>; user?: { admin?: boolean } }) {
+      if (user && typeof user === 'object' && 'admin' in user) {
+        (token as Record<string, unknown> & { admin?: boolean }).admin = user.admin;
       }
       return token;
     },
-    async session({ session, token }: { session: any; token: any }) {
-      if (token?.sub) {
-        session.user.id = token.sub;
+    async session({ session, token }: { session: Record<string, any>; token: Record<string, any> }) {
+      if (token?.sub && session.user) {
+        (session.user as Record<string, any>).id = token.sub;
       }
-      session.user.admin = token.admin;
+      if (session.user) {
+        (session.user as Record<string, any>).admin = token.admin;
+      }
       return session;
     },
   },

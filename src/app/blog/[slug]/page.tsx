@@ -1,12 +1,15 @@
 import Layout from '../../../components/Layout';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Post } from '@prisma/client';
 import { notFound } from 'next/navigation';
 
 const prisma = new PrismaClient();
 
-export default async function BlogPostPage(props: any) {
-  const params = await props.params;
-  const post = await prisma.post.findUnique({ where: { slug: params.slug } });
+interface BlogPostPageProps {
+  params: { slug: string };
+}
+
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  const post: Post | null = await prisma.post.findUnique({ where: { slug: params.slug } });
   if (!post) return notFound();
   return (
     <Layout>
