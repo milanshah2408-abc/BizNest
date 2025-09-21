@@ -14,23 +14,28 @@ export default function StatsDashboard({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    async function fetchStats() {
-      setLoading(true);
-      setError('');
-      try {
-        const res = await fetch('/api/stats');
-        if (!res.ok) throw new Error('Failed to fetch stats');
-        const data = await res.json();
-        setStats(data);
-      } catch (err: any) {
+useEffect(() => {
+  async function fetchStats() {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/stats');
+      if (!res.ok) throw new Error('Failed to fetch stats');
+      const data = await res.json();
+      setStats(data);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
         setError(err.message);
-      } finally {
-        setLoading(false);
+      } else {
+        setError(String(err));
       }
+    } finally {
+      setLoading(false);
     }
-    fetchStats();
-  }, []);
+  }
+  fetchStats();
+}, []);
+
 
   return (
     <div className="max-w-4xl mx-auto py-12">
