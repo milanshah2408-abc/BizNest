@@ -1,0 +1,2 @@
+- [ ] Project scaffolded with Next.js, Tailwind CSS, Prisma, PostgreSQL, NextAuth.js, Nodemailer
+- [ ] Continue with CMS, pages, admin panel, and features as described in requirements
