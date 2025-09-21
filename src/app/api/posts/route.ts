@@ -1,38 +1,62 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../lib/auth';
-
-// Extend the Session type to include user.id
-declare module "next-auth" {
-  interface Session {
-    user: {
-      admin: boolean;
-      id: string;
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-    }
-  }
-}
 
 const prisma = new PrismaClient();
 
-export async function GET() {
-  const posts = await prisma.post.findMany();
-  return NextResponse.json(posts);
+// GET /api/posts/[id]
+export async function GET(
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> }  // ✅ context.params is a Promise
+) {
+  try {
+    const { id } = await context.params; // await it
+    const post = await prisma.post.findUnique({ where: { id } });
+
+    if (!post) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(post);
+  } catch {
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }
 
-export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+// PUT /api/posts/[id]
+export async function PUT(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+    const { title, content } = await req.json();
+
+    if (!title || !content) {
+      return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+    }
+
+    const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const updatedPost = await prisma.post.update({
+      where: { id },
+      data: { title, content, slug },
+    });
+
+    return NextResponse.json(updatedPost);
+  } catch {
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
-  const { title, content } = await req.json();
-  if (!title || !content) {
-    return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+}
+
+// DELETE /api/posts/[id]
+export async function DELETE(
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+    await prisma.post.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
-  const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-  const post = await prisma.post.create({ data: { title, content, slug, authorId: session.user.id } });
-  return NextResponse.json(post, { status: 201 });
 }
