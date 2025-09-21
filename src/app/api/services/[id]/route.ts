@@ -3,30 +3,28 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// PUT /api/services/[id]
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   const { name, description } = await req.json();
-  const { id } = params;
 
   if (!name || !description) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
 
-  const service = await prisma.service.update({
+  const updatedService = await prisma.service.update({
     where: { id },
     data: { name, description },
   });
 
-  return NextResponse.json(service);
+  return NextResponse.json(updatedService);
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const { id } = params;
+// DELETE /api/services/[id]
+export async function DELETE(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+
   await prisma.service.delete({ where: { id } });
+
   return NextResponse.json({ success: true });
 }

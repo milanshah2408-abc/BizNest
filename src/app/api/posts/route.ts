@@ -12,10 +12,19 @@ export async function GET(_req: NextRequest) {
 
 // POST a new post
 export async function POST(req: NextRequest) {
-  const { title, content } = await req.json();
-  if (!title || !content) return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+  const { title, content, authorId } = await req.json();
+  if (!title || !content || !authorId) return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
 
   const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-  const post = await prisma.post.create({ data: { title, content, slug } });
+  const post = await prisma.post.create({
+    data: {
+      title,
+      content,
+      slug,
+      author: {
+        connect: { id: authorId }
+      }
+    }
+  });
   return NextResponse.json(post);
 }
