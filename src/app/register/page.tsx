@@ -22,8 +22,12 @@ export default function RegisterPage() {
       if (!res.ok) throw new Error('Registration failed');
       setSuccess(true);
       setForm({ username: '', email: '', password: '' });
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(String(err));
+      }
     } finally {
       setLoading(false);
     }
